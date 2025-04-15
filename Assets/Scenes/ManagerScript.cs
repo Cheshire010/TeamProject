@@ -5,11 +5,13 @@ public class ManagerScript : MonoBehaviour
 {
     public GameObject spotlight1;  // 첫 번째 스포트라이트
     public GameObject spotlight2;  // 두 번째 스포트라이트
+    public GameObject CarObject;
 
     void Start()
     {
         spotlight1.SetActive(false);
         spotlight2.SetActive(false);
+        CarObject.SetActive(false);
 
         StartCoroutine(ActivateSpotlights());
     }
@@ -20,6 +22,7 @@ public class ManagerScript : MonoBehaviour
 
         spotlight1.SetActive(true);
         spotlight2.SetActive(true);
+        CarObject.SetActive(true);
 
         Debug.Log("스포트라이트 ON!");
     }
