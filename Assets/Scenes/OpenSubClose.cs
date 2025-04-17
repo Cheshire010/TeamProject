@@ -4,23 +4,27 @@ using System.Collections;
 public class OpenSubClose : MonoBehaviour
 {
     [Header("플레이어 및 인터랙션 범위")]
-    public Transform player;                // 플레이어 Transform
-    public float interactionRange = 3f;     // 상호작용 거리
-    public float viewAngle = 45f;           // 상호작용 각도
+    public Transform player;
+    public float interactionRange = 3f;
+    public float viewAngle = 45f;
 
     [Header("애니메이터 및 오브젝트")]
-    public Animator targetAnimator;         // 애니메이터
-    public GameObject targetObject;         // 상호작용 오브젝트
+    public Animator targetAnimator;
+    public GameObject targetObject;
 
     [Header("UI 및 우선순위")]
-    public GameObject interactionUIText;    // 상호작용 텍스트 UI
-    public int priority = 3;                // 우선순위
+    public GameObject interactionUIText;
+    public int priority = 3;
 
     [Header("애니메이션 트리거 이름")]
     public string openTrigger = "OpenSub";
     public string closeTrigger = "CloseSub";
-    public float openAnimDuration = 1.0f;   // 열기 애니메이션 길이(초)
-    public float closeAnimDuration = 1.0f;  // 닫기 애니메이션 길이(초)
+    public float openAnimDuration = 1.0f;
+    public float closeAnimDuration = 1.0f;
+
+    [Header("사운드")]
+    public GameObject openSoundObject;   // 열기 사운드용 (AudioSource 포함)
+    public GameObject closeSoundObject;  // 닫기 사운드용 (AudioSource 포함)
 
     private bool isOpen = false;
     private bool isAnimating = false;
@@ -85,9 +89,11 @@ public class OpenSubClose : MonoBehaviour
     {
         isAnimating = true;
 
-        string trigger = isOpen ? closeTrigger : openTrigger;
-        float animDuration = isOpen ? closeAnimDuration : openAnimDuration;
+        bool willOpen = !isOpen;
+        string trigger = willOpen ? openTrigger : closeTrigger;
+        float animDuration = willOpen ? openAnimDuration : closeAnimDuration;
 
+        PlaySound(willOpen ? openSoundObject : closeSoundObject);
         PlayAnimation(trigger);
 
         yield return new WaitForSeconds(animDuration);
@@ -104,6 +110,12 @@ public class OpenSubClose : MonoBehaviour
             targetAnimator.ResetTrigger(closeTrigger);
             targetAnimator.SetTrigger(triggerName);
         }
+    }
+
+    private void PlaySound(GameObject soundObj)
+    {
+        if (soundObj != null && SoundManager.Instance != null)
+            SoundManager.Instance.PlayOneShot(soundObj);
     }
 
     private void ReleasePriorityIfHeld()

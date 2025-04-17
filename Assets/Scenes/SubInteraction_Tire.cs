@@ -11,6 +11,10 @@ public class SubInteraction_Tire : MonoBehaviour
     public GameObject goTireObject;           // Go 타이어 오브젝트
     public GameObject interactionUIText;      // 상호작용 텍스트
 
+    [Header("사운드")]
+    public GameObject exitTireSoundObject;    // Exit 타이어 사운드 (AudioSource 포함)
+    public GameObject goTireSoundObject;      // Go 타이어 사운드 (AudioSource 포함)
+
     public int priority = 2;                  // 우선순위
 
     private Renderer exitTireRenderer;
@@ -85,30 +89,37 @@ public class SubInteraction_Tire : MonoBehaviour
     {
         if (InteractionPriorityManager.Instance.CurrentPriority == priority)
             InteractionPriorityManager.Instance.ReleaseInteraction(gameObject);
-
     }
 
     private IEnumerator HandleTireSequence()
     {
         isInteracting = true;
 
-        // Exit 타이어 표시
+        // Exit 타이어 표시 및 사운드
         if (exitTireObject != null)
         {
             exitTireObject.SetActive(true);
+            PlaySound(exitTireSoundObject);
             Debug.Log("ExitTire 표시 시작.");
             yield return new WaitForSeconds(3f);
             exitTireObject.SetActive(false);
         }
 
-        // Go 타이어 표시
+        // Go 타이어 표시 및 사운드
         if (goTireObject != null)
         {
             goTireObject.SetActive(true);
+            PlaySound(goTireSoundObject);
             Debug.Log("GoTire 표시 시작.");
         }
 
         isInteracting = false;
         Debug.Log("타이어 상호작용 완료.");
+    }
+
+    private void PlaySound(GameObject soundObj)
+    {
+        if (soundObj != null && SoundManager.Instance != null)
+            SoundManager.Instance.PlayOneShot(soundObj);
     }
 }

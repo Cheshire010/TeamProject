@@ -12,12 +12,15 @@ public class WiperInteraction : MonoBehaviour
     public Animator wiperAnimator2;             // 와이퍼 애니메이터 2
     public GameObject[] targetObjects;          // 색상 바꿀 오브젝트 배열 (4개까지 가능)
 
+    [Header("사운드")]
+    public GameObject exitSoundObject;          // Exit 단계 사운드 (AudioSource 포함)
+    public GameObject changeSoundObject;        // Change 단계 사운드 (AudioSource 포함)
+
     public int priority = 1;                    // 우선순위
 
     private Renderer[] targetRenderers;
     private Color[] originalColors;
     private bool isInteracting = false;
-    private bool isFirstPhase = true;
 
     private void Start()
     {
@@ -87,9 +90,10 @@ public class WiperInteraction : MonoBehaviour
     {
         isInteracting = true;
 
-        // 1단계: Exit (Wipe, Wipe2 애니메이션 트리거)
+        // 1단계: Exit (Wipe, Wipe2 애니메이션 트리거) + 사운드
         if (wiperAnimator1 != null && wiperAnimator2 != null)
         {
+            PlaySound(exitSoundObject);
             wiperAnimator1.SetTrigger("Exit");   // Wipe
             wiperAnimator2.SetTrigger("Exit");   // Wipe2
             Debug.Log("Wipe, Wipe2 애니메이션 시작 (Exit)");
@@ -97,9 +101,10 @@ public class WiperInteraction : MonoBehaviour
             yield return new WaitForSeconds(3f);  // 애니메이션 대기 시간
         }
 
-        // 2단계: Change (Wipe3, Wipe4 애니메이션 트리거)
+        // 2단계: Change (Wipe3, Wipe4 애니메이션 트리거) + 사운드
         if (wiperAnimator1 != null && wiperAnimator2 != null)
         {
+            PlaySound(changeSoundObject);
             wiperAnimator1.SetTrigger("Change");  // Wipe3
             wiperAnimator2.SetTrigger("Change");  // Wipe4
             Debug.Log("Wipe3, Wipe4 애니메이션 시작 (Change)");
@@ -111,4 +116,9 @@ public class WiperInteraction : MonoBehaviour
         Debug.Log("와이퍼 상호작용 완료.");
     }
 
+    private void PlaySound(GameObject soundObj)
+    {
+        if (soundObj != null && SoundManager.Instance != null)
+            SoundManager.Instance.PlayOneShot(soundObj);
+    }
 }

@@ -2,7 +2,6 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-
 public class InteractionDoor : MonoBehaviour
 {
     public Transform player;               // 플레이어 위치
@@ -14,6 +13,11 @@ public class InteractionDoor : MonoBehaviour
     public Animator doorAnimator;          // 도어 애니메이터
     public GameObject highlightObject;     // 색상 변경할 오브젝트
     public GameObject interactionUIText;   // 상호작용 UI 텍스트
+
+
+    [Header("사운드")]
+    public GameObject openSoundObject;     // 문 열기 사운드 (AudioSource 포함)
+    public GameObject closeSoundObject;    // 문 닫기 사운드 (AudioSource 포함)
 
     private Renderer highlightRenderer;
     private Color originalColor;
@@ -37,7 +41,6 @@ public class InteractionDoor : MonoBehaviour
         if (interactionUIText != null)
             interactionUIText.SetActive(false);
     }
-
 
     private void Update()
     {
@@ -76,7 +79,8 @@ public class InteractionDoor : MonoBehaviour
         Vector3 directionToTarget = (transform.position - player.position).normalized;
         float angle = Vector3.Angle(player.forward, directionToTarget);
 
-        Debug.Log($"거리: {distance}, 범위: {interactionRange}, 각도: {angle}, 시야각: {viewAngle}");
+        // 디버그 로그는 실제 배포 시 삭제해도 무방
+        // Debug.Log($"거리: {distance}, 범위: {interactionRange}, 각도: {angle}, 시야각: {viewAngle}");
 
         return (distance <= interactionRange && angle <= viewAngle);
     }
@@ -90,23 +94,17 @@ public class InteractionDoor : MonoBehaviour
         {
             if (canInteract)
             {
-                // 다음 방법들을 순차적으로 시도해 보세요
                 highlightRenderer.material.SetColor("_Color", Color.red);
-                // 또는
                 highlightRenderer.material.SetColor("_BaseColor", Color.red);
-                // 또는
                 highlightRenderer.material.SetColor("_EmissionColor", Color.red);
                 highlightRenderer.material.EnableKeyword("_EMISSION");
             }
             else
             {
                 highlightRenderer.material.color = originalColor;
-                // 필요한 경우 다른 속성도 원래대로 복원
             }
         }
     }
-
-
 
     private void ReleasePriorityIfHeld()
     {
@@ -119,10 +117,17 @@ public class InteractionDoor : MonoBehaviour
         if (doorAnimator != null)
         {
             string triggerName = isOpen ? "Close" : "Open";
+            PlaySound(isOpen ? closeSoundObject : openSoundObject); // 사운드 재생
             doorAnimator.SetTrigger(triggerName);
             Debug.Log($"도어 {(isOpen ? "닫는 중" : "여는 중")}");
 
             isOpen = !isOpen;
         }
+    }
+
+    private void PlaySound(GameObject soundObj)
+    {
+        if (soundObj != null && SoundManager.Instance != null)
+            SoundManager.Instance.PlayOneShot(soundObj);
     }
 }

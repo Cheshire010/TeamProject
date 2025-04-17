@@ -22,6 +22,10 @@ public class SubInteraction : MonoBehaviour
     [Tooltip("닫기 애니메이션 길이(초)")]
     public float closeAnimDuration = 1.0f;
 
+    [Header("사운드")]
+    public GameObject openSoundObject;   // 열기 사운드용 (AudioSource 포함)
+    public GameObject closeSoundObject;  // 닫기 사운드용 (AudioSource 포함)
+
     private Renderer targetRenderer;
     private Color originalColor;
     private bool isOpen = false;
@@ -87,9 +91,11 @@ public class SubInteraction : MonoBehaviour
         isAnimating = true;
         TogglePlayerControl(false);
 
-        string trigger = isOpen ? closeTrigger : openTrigger;
-        float animDuration = isOpen ? closeAnimDuration : openAnimDuration;
+        bool willOpen = !isOpen;
+        string trigger = willOpen ? openTrigger : closeTrigger;
+        float animDuration = willOpen ? openAnimDuration : closeAnimDuration;
 
+        PlaySound(willOpen ? openSoundObject : closeSoundObject);
         PlayAnimation(trigger);
 
         yield return new WaitForSeconds(animDuration);
@@ -108,6 +114,12 @@ public class SubInteraction : MonoBehaviour
             targetAnimator.SetTrigger(triggerName);
             Debug.Log($"애니메이션 트리거: {triggerName}");
         }
+    }
+
+    private void PlaySound(GameObject soundObj)
+    {
+        if (soundObj != null && SoundManager.Instance != null)
+            SoundManager.Instance.PlayOneShot(soundObj);
     }
 
     private bool CheckPlayerInRangeAndView()

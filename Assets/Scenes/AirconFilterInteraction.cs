@@ -15,11 +15,15 @@ public class AirconFilterInteraction : MonoBehaviour
     [Header("UI")]
     public GameObject interactionUIText;
 
+    [Header("사운드")]
+    public GameObject openSoundObject;   // OpenFilter 사운드용 (AudioSource 포함)
+    public GameObject closeSoundObject;  // CloseFilter 사운드용 (AudioSource 포함)
+
     [Header("애니메이션 트리거 및 길이")]
     public string openTrigger = "OpenFilter";
     public string closeTrigger = "CloseFilter";
-    public float openAnimDuration = 4.01f;    // OpenFilter 애니메이션 길이(초)
-    public float closeAnimDuration = 2.0f;    // CloseFilter 애니메이션 길이(초)
+    public float openAnimDuration = 4.01f;
+    public float closeAnimDuration = 2.0f;
 
     private bool isInteracting = false;
     private bool hasInteracted = false;
@@ -93,7 +97,8 @@ public class AirconFilterInteraction : MonoBehaviour
         isInteracting = true;
         HandleUI(false);
 
-        // 1. OpenFilter 애니메이션 실행 (4.01초)
+        // 1. OpenFilter 애니메이션 & 사운드 실행
+        PlaySound(openSoundObject);
         PlayAnimation(openTrigger);
         yield return new WaitForSeconds(openAnimDuration);
 
@@ -107,7 +112,8 @@ public class AirconFilterInteraction : MonoBehaviour
         isInteracting = true;
         HandleUI(false);
 
-        // 1. CloseFilter 애니메이션 실행 (2초)
+        // 1. CloseFilter 애니메이션 & 사운드 실행
+        PlaySound(closeSoundObject);
         PlayAnimation(closeTrigger);
         yield return new WaitForSeconds(closeAnimDuration);
 
@@ -123,5 +129,11 @@ public class AirconFilterInteraction : MonoBehaviour
             targetAnimator.ResetTrigger(closeTrigger);
             targetAnimator.SetTrigger(triggerName);
         }
+    }
+
+    private void PlaySound(GameObject soundObj)
+    {
+        if (soundObj != null && SoundManager.Instance != null)
+            SoundManager.Instance.PlayOneShot(soundObj);
     }
 }

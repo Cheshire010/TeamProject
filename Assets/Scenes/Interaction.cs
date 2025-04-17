@@ -2,26 +2,29 @@ using UnityEngine;
 
 public class Interaction : MonoBehaviour
 {
-    public int priority = 1;                   // 우선순위: 1 (서브 인터랙션이 0순위일 경우)
+    public int priority = 1;
 
-    public Transform player;                  // 플레이어 위치
-    public float interactionRange = 3f;       // 상호작용 가능 거리
-    public float viewAngle = 45f;             // 플레이어 시야각
+    public Transform player;
+    public float interactionRange = 3f;
+    public float viewAngle = 45f;
 
-    public Animator targetAnimator;           // 대상 애니메이터
-    public GameObject interactionUIText;      // 상호작용 안내 텍스트
-    public GameObject targetObject;           // 색상 변경할 물체 (퍼블릭으로 등록)
+    public Animator targetAnimator;
+    public GameObject interactionUIText;
+    public GameObject targetObject;
 
-    private Renderer targetRenderer;          // 렌더러
-    private Color originalColor;              // 원래 색상 저장
-    private bool isOpen = false;              // 뚜껑 열림/닫힘 상태
+    [Header("사운드")]
+    public GameObject openSoundObject;   // AudioSource 포함, Inspector에서 할당
+    public GameObject closeSoundObject;  // AudioSource 포함, Inspector에서 할당
+
+    private Renderer targetRenderer;
+    private Color originalColor;
+    private bool isOpen = false;
 
     private void Start()
     {
         if (interactionUIText != null)
             interactionUIText.SetActive(false);
 
-        // targetObject를 통한 Renderer 등록
         if (targetObject != null)
         {
             targetRenderer = targetObject.GetComponent<Renderer>();
@@ -34,17 +37,14 @@ public class Interaction : MonoBehaviour
 
     private void Update()
     {
-        // 우선순위 시스템이 있다면: 이 오브젝트가 현재 최우선 대상일 때만 실행
         if (!IsHighestPriority()) return;
-
         HandleInteraction();
     }
 
     private bool IsHighestPriority()
     {
-        // 만약 InteractionManager 같은 시스템이 있다면 여기서 우선순위 비교
-        // 예: return InteractionManager.Instance.IsCurrentTarget(this);
-        return true;  // 일단 독립적으로 실행 시 항상 true
+        // 우선순위 시스템이 있다면 사용, 아니면 항상 true
+        return true;
     }
 
     private void HandleInteraction()
@@ -52,7 +52,6 @@ public class Interaction : MonoBehaviour
         float distance = Vector3.Distance(player.position, transform.position);
         bool canInteract = false;
 
-        // 거리 + 시야각 체크
         if (distance <= interactionRange)
         {
             Vector3 directionToTarget = (transform.position - player.position).normalized;
@@ -62,15 +61,12 @@ public class Interaction : MonoBehaviour
                 canInteract = true;
         }
 
-        // 텍스트 표시 제어
         if (interactionUIText != null)
             interactionUIText.SetActive(canInteract);
 
-        // 색상 변경: 상호작용 가능 = 진홍색, 불가능 = 원래 색상
         if (targetRenderer != null)
             targetRenderer.material.color = canInteract ? Color.red : originalColor;
 
-        // E 키 입력 시 상호작용
         if (canInteract && Input.GetKeyDown(KeyCode.E))
         {
             if (targetAnimator != null)
@@ -79,15 +75,23 @@ public class Interaction : MonoBehaviour
                 {
                     targetAnimator.SetTrigger("CloseLid");
                     Debug.Log("뚜껑 닫기!");
+                    PlaySound(closeSoundObject);
                 }
                 else
                 {
                     targetAnimator.SetTrigger("OpenLid");
                     Debug.Log("뚜껑 열기!");
+                    PlaySound(openSoundObject);
                 }
 
-                isOpen = !isOpen;  // 상태 전환
+                isOpen = !isOpen;
             }
         }
+    }
+
+    private void PlaySound(GameObject soundObj)
+    {
+        if (soundObj != null && SoundManager.Instance != null)
+            SoundManager.Instance.PlayOneShot(soundObj);
     }
 }
